@@ -1,0 +1,4 @@
+myenv
+data/inventory.db
+*.db
+models/*.pkl

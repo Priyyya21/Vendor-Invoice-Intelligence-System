@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vendor Invoice Intelligence</title>
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+}
+
+/* 3D Card */
+.container {
+    width: 480px;
+    margin: 60px auto;
+    padding: 30px;
+    border-radius: 20px;
+    background: linear-gradient(145deg, #ffffff, #e6e6e6);
+    box-shadow: 
+        10px 10px 30px rgba(0,0,0,0.4),
+        -10px -10px 25px rgba(255,255,255,0.2);
+    text-align: center;
+}
+
+h1 { color: #222; }
+
+.intro {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.dynamic-text {
+    color: #0072ff;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* Switch */
+.switch {
+    display: flex;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+    background: #ddd;
+}
+
+.switch button {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.active-btn {
+    background: linear-gradient(135deg, #00c6ff, #0072ff);
+    color: white;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+}
+
+/* Inputs */
+input {
+    width: 92%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 10px;
+    border: none;
+    background: #f1f1f1;
+    box-shadow: inset 4px 4px 8px rgba(0,0,0,0.1),
+                inset -4px -4px 8px rgba(255,255,255,0.7);
+}
+
+/* Button */
+button.submit {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, #00c6ff, #0072ff);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0,114,255,0.4);
+    transition: 0.2s;
+}
+
+button.submit:hover {
+    transform: translateY(-2px);
+}
+
+/* Cards */
+.card { display: none; }
+.card.active { display: block; }
+
+.result {
+    margin-top: 15px;
+    font-size: 18px;
+    color: #0072ff;
+    font-weight: bold;
+}
+
+.error { color: red; }
+</style>
+
+<script>
+function switchTab(type) {
+    document.getElementById("model").value = type;
+
+    document.getElementById("freight").classList.remove("active");
+    document.getElementById("invoice").classList.remove("active");
+
+    document.getElementById(type).classList.add("active");
+
+    document.getElementById("btn_freight").classList.remove("active-btn");
+    document.getElementById("btn_invoice").classList.remove("active-btn");
+
+    document.getElementById("btn_" + type).classList.add("active-btn");
+
+    // Dynamic text
+    if(type === "freight"){
+        document.getElementById("dynamicText").innerText =
+        "Predict optimized freight cost based on quantity and invoice value.";
+    } else {
+        document.getElementById("dynamicText").innerText =
+        "Detect risky invoices and improve financial security.";
+    }
+}
+
+window.onload = function () {
+    let active = "{{ active }}";
+    switchTab(active || "freight");
+};
+</script>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>📊 Vendor Intelligence</h1>
+
+<div class="intro">
+AI-powered system to optimize logistics cost and detect invoice risks for smarter decisions.
+</div>
+
+<div id="dynamicText" class="dynamic-text"></div>
+
+{% if error %}
+<div class="error">{{ error }}</div>
+{% endif %}
+
+<div class="switch">
+<button id="btn_freight" onclick="switchTab('freight')">Freight</button>
+<button id="btn_invoice" onclick="switchTab('invoice')">Invoice Risk</button>
+</div>
+
+<form method="POST" action="/predict">
+<input type="hidden" name="model" id="model" value="freight">
+
+<!-- Freight -->
+<div id="freight" class="card">
+<input type="number" name="quantity" placeholder="Quantity"
+value="{{ form_data.get('quantity','') }}" required>
+
+<input type="number" name="dollars" placeholder="Invoice Dollars"
+value="{{ form_data.get('dollars','') }}" required>
+
+<button class="submit">Predict Freight</button>
+
+{% if freight_result %}
+<div class="result">{{ freight_result }}</div>
+{% endif %}
+</div>
+
+<!-- Invoice -->
+<div id="invoice" class="card">
+<input type="number" name="invoice_quantity"
+value="{{ form_data.get('invoice_quantity','') }}" placeholder="Invoice Quantity">
+
+<input type="number" name="invoice_dollars"
+value="{{ form_data.get('invoice_dollars','') }}" placeholder="Invoice Dollars">
+
+<input type="number" name="freight"
+value="{{ form_data.get('freight','') }}" placeholder="Freight">
+
+<input type="number" name="total_item_quantity"
+value="{{ form_data.get('total_item_quantity','') }}" placeholder="Total Quantity">
+
+<input type="number" name="total_item_dollars"
+value="{{ form_data.get('total_item_dollars','') }}" placeholder="Total Dollars">
+
+<button class="submit">Check Invoice Risk</button>
+
+{% if flag_result %}
+<div class="result">{{ flag_result }}</div>
+{% endif %}
+</div>
+
+</form>
+
+</div>
+
+</body>
+</html>
